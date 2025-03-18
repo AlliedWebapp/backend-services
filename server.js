@@ -7,13 +7,22 @@ const connectDB = require('./config/db')
 const path = require('path')
 const PORT = process.env.PORT || 5000
 require("dotenv").config({ path: path.resolve(__dirname, ".env") });
-console.log("MongoDB URI:", process.env.MONGODB_URI);
+const solding = require("./models/soldingModel");
+const Shong = require("./models/ShongModel");
+const Jogini = require("./models/JoginiModel");
+const SDLLPsalun = require("./models/SDLLPsalunModel");
+const Kuwarsi = require("./models/KuwarsiModel");
 
+
+console.log("MongoDB URI:", process.env.MONGODB_URI);
+const router = express.Router();
 
 // ✅ Connect to database
 connectDB()
 
 const app = express()
+
+
 
 app.use(cors({
   origin: 'https://alliedwebapp.vercel.app'
@@ -44,6 +53,7 @@ app.use(express.urlencoded({ extended: false }))
  */
 app.use('/api/users', require('./routes/userRoutes'))
 app.use('/api/tickets', require('./routes/ticketRoutes'))
+app.use('/api/spares', require('./routes/spareRoutes'))
 
 // ✅ Backend Health Check Route
 app.get("/api/health", (req, res) => {
@@ -63,7 +73,17 @@ if (process.env.NODE_ENV === 'production') {
   app.get('/', (req, res) => {
     res.status(200).json({ message: 'Welcome to the Support Desk API' })
   })
-}
+} 
+
+router.get("/spare", async (req, res) => {
+  try {
+    // const spares = await Spare.find();
+    // res.status(200).json(spares);
+    res.status(200).json({ message: 'Welcome to the Support Desk API' })
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching spares", error });
+  }
+});
 
 /**
  * Error Handling Middleware
@@ -76,4 +96,5 @@ app.use(errorHandler)
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`)
 })
-app.use("/api/spares", require("./routes/spareRoutes"));
+
+

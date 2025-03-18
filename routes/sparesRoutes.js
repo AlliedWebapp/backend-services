@@ -1,17 +1,7 @@
-const express = require("express");
-const router = express.Router();
-const Spare = require("../models/spareModel");
+const express = require('express')
+const router = express.Router()
+const { getAllSpares } = require('../controllers/sparesController')
 
-// @desc   Fetch all spares
-// @route  GET /api/spares
-// @access Public
-router.get("/", async (req, res) => {
-  try {
-    const spares = await Spare.find();
-    res.json(spares);
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching spares", error });
-  }
-});
+router.get('/', getAllSpares)
 
-module.exports = router;
+module.exports = router 
