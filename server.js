@@ -12,6 +12,8 @@ const Shong = require("./models/ShongModel");
 const Jogini = require("./models/JoginiModel");
 const SDLLPsalun = require("./models/SDLLPsalunModel");
 const Kuwarsi = require("./models/KuwarsiModel");
+const spareRoutes = require('./routes/spareRoutes');
+
 
 
 console.log("MongoDB URI:", process.env.MONGODB_URI);
