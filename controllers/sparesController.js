@@ -66,29 +66,27 @@ const getAllShong = async (req, res) => {
     }
 };
 
-// Get all Jogini data
-const getAllJogini = async (req, res) => {
-    console.log("Getting Jogini data...");
+// Get all Jogini dataconst
+    const getAllJogini = async (req, res) => {
+    console.log("🔍 Fetching Jogini data...");
     try {
         const data = await Jogini.find();
-        console.log("Jogini Data Found:", data);
-        res.status(200).json({
-            success: true,
-            data: data,
-            count: data.length,
-            message: "Data fetched successfully"
-        });
+        if (!data.length) {
+            console.log("⚠️ No Jogini data found in DB.");
+        }
+        console.log("✅ Jogini Data Found:", data);
+        res.status(200).json({ success: true, data, count: data.length });
     } catch (error) {
-        console.error("Error in getAllJogini:", error);
+        console.error("❌ Error in getAllJogini:", error);
         res.status(500).json({
             success: false,
             message: "Error fetching Jogini data",
             error: error.message,
-            stack: error.stack,
-            details: error
+            stack: error.stack
         });
     }
 };
+
 
 // Get all SDLLPsalun data
 const getAllSDLLPsalun = async (req, res) => {

@@ -21,10 +21,27 @@ const Kuwarsi = require("./models/KuwarsiModel");
 console.log("MongoDB URI:", process.env.MONGODB_URI);
 
 // ✅ Connect to database
-connectDB();
-console.log("Connected to DB:", mongoose.connection.name);
+connectDB().then(() => {
+    console.log("✅ Database Connection Initialized");
+    console.log("🗂️ Using Database:", mongoose.connection.name);
 
-// Add error handling for MongoDB connection
+    // List collections after successful connection
+    mongoose.connection.db.listCollections().toArray()
+        .then(collections => {
+            console.log("🗂️ Available Collections:", collections.map(col => col.name));
+        })
+        .catch(err => console.error("❌ Error Fetching Collections:", err));
+});
+
+mongoose.connection.once("open", () => {
+    console.log("✅ MongoDB connection established!");
+});
+
+mongoose.connection.on("error", (err) => {
+    console.error("❌ MongoDB connection error:", err);
+});
+
+// MongoDB Connection Event Logging
 mongoose.connection.on('connected', () => {
     console.log('✅ MongoDB Connected successfully');
     console.log({
