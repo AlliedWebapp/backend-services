@@ -16,5 +16,5 @@ const sdllpSalunSchema = new mongoose.Schema({
   types: { type: String, default: "" }, // "Types"
 }, { timestamps: true }); // Adds createdAt & updatedAt fields automatically
 
-const SDLLPSalun = mongoose.model("SDLLPSalun", sdllpSalunSchema, "SDLLP_Salun"); 
-module.exports = SDLLPSalun;
+const SDLLPsalun = mongoose.model("SDLLPsalun", sdllpSalunSchema, "SDLLPsalun"); 
+module.exports = SDLLPsalun;
