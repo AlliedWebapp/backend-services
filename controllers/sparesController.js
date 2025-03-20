@@ -1,34 +1,25 @@
-const asyncHandler = require('express-async-handler')
-const solding = require("../models/soldingModel")
-const Shong = require("../models/ShongModel")
-const Jogini = require("../models/JoginiModel")
-const SDLLPsalun = require("../models/SDLLPsalunModel")
-const Kuwarsi = require("../models/KuwarsiModel")
+const JoginiModel = require("../models/JoginiModel");
+const ShongModel = require("../models/ShongModel");
+const soldingModel = require("../models/soldingModel");
+const SDLLPsalunModel = require("../models/SDLLPsalunModel");
+const KuwarsiModel = require("../models/KuwarsiModel");
 
-// @desc    Get all spares from all collections
-// @route   GET /api/spares
-// @access  Public
-const getAllSpares = asyncHandler(async (req, res) => {
-  try {
-    const soldingItems = await solding.find()
-    const shongItems = await Shong.find()
-    const joginiItems = await Jogini.find()
-    const sdllpItems = await SDLLPsalun.find()
-    const kuwarsiItems = await Kuwarsi.find()
+exports.getInventory = async (req, res) => {
+    try {
+        const joginiData = await JoginiModel.find({});
+        const shongData = await ShongModel.find({});
+        const soldingData = await soldingModel.find({});
+        const sdllpData = await SDLLPsalunModel.find({});
+        const kuwarsiData = await KuwarsiModel.find({});
 
-    res.status(200).json({
-      solding: soldingItems,
-      shong: shongItems,
-      jogini: joginiItems,
-      sdllp: sdllpItems,
-      kuwarsi: kuwarsiItems
-    })
-  } catch (error) {
-    res.status(500)
-    throw new Error('Error fetching spares data')
-  }
-})
-
-module.exports = {
-  getAllSpares
-}
+        res.json({
+            jogini: joginiData,
+            shong: shongData,
+            solding: soldingData,
+            sdllp: sdllpData,
+            kuwarsi: kuwarsiData,
+        });
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching inventory", error });
+    }
+};
