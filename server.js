@@ -27,10 +27,20 @@ console.log("Connected to DB:", mongoose.connection.name);
 // Add error handling for MongoDB connection
 mongoose.connection.on('connected', () => {
     console.log('✅ MongoDB Connected successfully');
+    console.log({
+        database: mongoose.connection.name,
+        host: mongoose.connection.host,
+        port: mongoose.connection.port
+    });
 });
 
 mongoose.connection.on('error', (err) => {
-    console.error('❌ MongoDB Connection Error:', err);
+    console.error('❌ MongoDB Connection Error:', {
+        error: err,
+        message: err.message,
+        code: err.code,
+        connectionString: 'MongoDB URI is ' + (process.env.MONGODB_URI ? 'set' : 'not set')
+    });
 });
 
 const app = express();
@@ -47,9 +57,13 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-// Debug middleware to log all requests
+// Detailed request logging middleware
 app.use((req, res, next) => {
-    console.log(`${req.method} ${req.url}`);
+    console.log(`[${new Date().toISOString()}]`);
+    console.log(`📍 Route accessed: ${req.method} ${req.url}`);
+    console.log('📦 Request Body:', req.body);
+    console.log('🔍 Query Params:', req.query);
+    console.log('🎯 Headers:', req.headers);
     next();
 });
 
@@ -63,8 +77,9 @@ app.get('/test', (req, res) => {
 
 // Root route
 app.get('/', (req, res) => {
-    res.json({ 
+    res.json({
         message: 'Welcome to the Support Desk API',
+        environment: process.env.NODE_ENV,
         endpoints: {
             jogini: '/api/jogini',
             solding: '/api/solding',
@@ -90,12 +105,23 @@ app.use('*', (req, res) => {
     });
 });
 
-// Error handler must be last
-app.use(errorHandler);
+// Error handling with full details
+app.use((err, req, res, next) => {
+    console.error('🔴 Error:', err);
+    res.status(err.status || 500).json({
+        success: false,
+        message: err.message,
+        stack: err.stack,
+        error: err,
+        route: req.originalUrl,
+        method: req.method,
+        timestamp: new Date().toISOString()
+    });
+});
 
 /**
  * ✅ Start Server
  */
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`🚀 Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
 });

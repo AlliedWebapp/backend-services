@@ -9,12 +9,23 @@ const {
     getAllKuwarsi
 } = require("../controllers/sparesController");
 
-// Test route
-router.get("/test", (req, res) => {
-    res.json({ message: "Routes are working" });
+// Debug route to test API
+router.get("/debug", (req, res) => {
+    res.json({
+        message: "API is working in development mode",
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV,
+        routes: {
+            jogini: '/api/jogini',
+            solding: '/api/solding',
+            shong: '/api/shong',
+            sdllpsalun: '/api/sdllpsalun',
+            kuwarsi: '/api/kuwarsi'
+        }
+    });
 });
 
-// Define routes WITHOUT /api prefix
+// Data routes
 router.get("/jogini", getAllJogini);
 router.get("/solding", getAllSolding);
 router.get("/shong", getAllShong);
