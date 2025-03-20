@@ -1,69 +1,80 @@
-const express = require("express");
-const colors = require("colors");
-const dotenv = require("dotenv").config();
-const cors = require("cors");
-const path = require("path");
-const { errorHandler } = require("./middleware/errorMiddleware");
-const connectDB = require("./config/db");
+const express = require('express'); // CommonJS module syntax
+const colors = require('colors');
+const dotenv = require('dotenv').config();
+const cors = require('cors'); // ✅ Import CORS
+const { errorHandler } = require('./middleware/errorMiddleware');
+const connectDB = require('./config/db');
+const path = require('path');
+const spareRoutes = require('./routes/spareRoutes');
 
-// ✅ Initialize Express App
-const app = express();
-
-// ✅ Load environment variables
 const PORT = process.env.PORT || 5000;
-console.log("MongoDB URI:", process.env.MONGODB_URI);
+require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 
-// ✅ Connect to MongoDB (Only Once)
-connectDB();
-
-// ✅ Middleware to parse JSON & URL-encoded data
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-
-// ✅ Configure CORS
-const corsOptions = {
-  origin: process.env.FRONTEND_URL || "http://localhost:3000",
-  credentials: true,
-  optionSuccessStatus: 200,
-};
-
-app.use(cors(corsOptions));
-
-// ✅ Import Models (Only if needed)
+// ✅ Import Mongoose Models
 const solding = require("./models/soldingModel");
 const Shong = require("./models/ShongModel");
 const Jogini = require("./models/JoginiModel");
 const SDLLPsalun = require("./models/SDLLPsalunModel");
 const Kuwarsi = require("./models/KuwarsiModel");
 
-// ✅ Define API Routes
-app.use("/api/inventory", require("./routes/inventoryRoutes"));
-app.use("/api/users", require("./routes/userRoutes"));
-app.use("/api/tickets", require("./routes/ticketRoutes"));
-app.use("/api/spares", require("./routes/spareRoutes"));
+console.log("MongoDB URI:", process.env.MONGODB_URI);
 
-// ✅ Health Check API (Debugging)
+// ✅ Connect to database
+connectDB();
+
+const app = express();
+const router = express.Router();
+
+
+ 
+app.use(express.json()); // Enable JSON Parsing
+app.use(express.urlencoded({ extended: false }));
+
+// ✅ CORS Configuration
+const corsOptions = {
+  origin: 'https://alliedwebapp.vercel.app',
+  credentials: true, // Access-Control-Allow-Credentials
+  optionSuccessStatus: 200,
+};
+app.use(cors(corsOptions)); // Enable CORS
+
+/**
+ * ✅ API Routes
+ */
+app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/tickets', require('./routes/ticketRoutes'));
+app.use("/api/spares", spareRoutes);
+app.use("/api", spareRoutes); // Register API route
+
+// ✅ Health Check Route
 app.get("/api/health", (req, res) => {
   res.status(200).json({ message: "✅ Backend is running fine!" });
 });
 
-// ✅ Remove Frontend Serving (If Backend Only Handles API)
-if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../frontend/build")));
+// ✅ Spare Route
+router.get("/spare", async (req, res) => {
+  try {
+    res.status(200).json({ message: 'Welcome to the Support Desk API' });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching spares", error });
+  }
+});
 
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../frontend/build/index.html"));
-  });
-} else {
-  app.get("/", (req, res) => {
-    res.status(200).json({ message: "Welcome to the API" });
-  });
-}
 
-// ✅ Error Handling Middleware
+ 
+app.get('/', (req, res) => {
+  res.status(200).json({ message: 'Welcome to the Backend API' });
+});
+
+
+/**
+ * ✅ Error Handling Middleware
+ */
 app.use(errorHandler);
 
-// ✅ Start Express Server
+/**
+ * ✅ Start Server
+ */
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });

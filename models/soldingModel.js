@@ -16,5 +16,5 @@ const soldingSchema = new mongoose.Schema({
   types: { type: String, default: "" }, // "TYPES"
 }, { timestamps: true }); // Adds createdAt & updatedAt fields automatically
 
-const Solding = mongoose.model("Solding", soldingSchema, "Solding");
-module.exports = Solding;
+const solding = mongoose.model("solding", soldingSchema, "solding");
+module.exports = solding;

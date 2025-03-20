@@ -1,20 +1,22 @@
 const mongoose = require("mongoose");
 
-const joginiSchema = new mongoose.Schema({
-  sNo: { type: Number, required: true }, // "S.No"
-  spareDescription: { type: String, required: true }, // "Spare Description"
-  make: {
-    vendor: { type: String, default: "" }, // "Make" -> "Vendor"
+const joginiSchema = new mongoose.Schema(
+  {
+    sNo: { type: Number, required: true }, // Removed alias since MongoDB stores keys without alias
+    spareDescription: { type: String, required: true, trim: true },
+    make: {
+      vendor: { type: String, required: true, trim: true },
+    },
+    month: { type: String, required: true, trim: true },
+    openingStock: { type: Number, default: 0 }, // Changed to Number
+    receivedQty: { type: Number, default: 0 }, // Changed to Number
+    monthlyConsumption: { type: Number, default: 0 },
+    closingStock: { type: Number, default: 0 },
+    msl: { type: Number, default: 0 }, // Changed to Number
+    sign: { type: String, trim: true },
   },
-  month: { type: String, required: true }, // "Month"
-  openingStock: { type: String, required: true }, // "OPENING STOCK ( NOS )"
-  receivedQty: { type: String, default: "" }, // "RECEIVED QTY ( NOS )"
-  monthlyConsumption: { type: Number, default: 0 }, // "Monthly Consumption ( NOS )"
-  closingStock: { type: Number, required: true }, // "CLOSING STOCK ( NOS )"
-  msl: { type: String, default: "" }, // "MSL (Maximum Stock Level...)"
-  sign: { type: String, default: "" }, // "SIGN."
-  field11: { type: String, default: "" }, // "FIELD11"
-}, { timestamps: true }); // Adds createdAt & updatedAt fields automatically
+  { timestamps: true, collection: "Jogini" } // Added collection name explicitly
+);
 
-const Jogini = mongoose.model("Jogini", joginiSchema, "Jogini"); 
+const Jogini = mongoose.model("Jogini", joginiSchema);
 module.exports = Jogini;

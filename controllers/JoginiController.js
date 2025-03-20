@@ -6,19 +6,23 @@ const Jogini = require("../models/JoginiModel");
 // @access  Public
 const getAllJogini = asyncHandler(async (req, res) => {
   try {
-    console.log("Fetching Jogini inventory data...");
+    console.log("🔄 Fetching Jogini inventory data...");
 
     const joginiItems = await Jogini.find().lean().limit(100);
 
-    console.log("Fetched Jogini items:", joginiItems);
+    if (!joginiItems.length) {
+      console.warn("⚠️ No Jogini items found in the database.");
+    } else {
+      console.log(`✅ Fetched ${joginiItems.length} Jogini items.`);
+    }
 
     res.status(200).json({
       success: true,
-      data: joginiItems || [],
+      data: joginiItems,
     });
 
   } catch (error) {
-    console.error("Error fetching Jogini data:", error);
+    console.error("❌ Error fetching Jogini data:", error.stack);
     res.status(500).json({
       success: false,
       message: "Internal Server Error",
