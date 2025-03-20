@@ -36,64 +36,52 @@ mongoose.connection.once('open', () => {
 });
 
 const app = express();
-const router = express.Router();
-app.use(express.json()); // Enable JSON Parsing
+
+// Middleware
+app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// ✅ CORS Configuration
+// CORS Configuration
 const corsOptions = {
-  origin: ['https://alliedwebapp.vercel.app', 'https://backend-services-theta.vercel.app'],
-  credentials: true,
-  optionSuccessStatus: 200,
+    origin: ['https://alliedwebapp.vercel.app', 'https://backend-services-theta.vercel.app'],
+    credentials: true,
+    optionSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
 
-/**
- * ✅ API Routes
- */
-app.use('/api/users', require('./routes/userRoutes'));
-app.use('/api/tickets', require('./routes/ticketRoutes'));
-app.use("/api/spares", spareRoutes);
-app.use("/api", spareRoutes); // Register API route
+// Test route to verify server is working
+app.get("/test", (req, res) => {
+    res.json({ message: "Server is working" });
+});
 
-// ✅ Health Check Route
+// Route registrations - only use one prefix
+app.use('/api', spareRoutes);  // This will handle all routes
+
+// Health check route
 app.get("/api/health", (req, res) => {
-  res.status(200).json({ message: "✅ Backend is running fine!" });
+    res.status(200).json({ 
+        message: "✅ Backend is running fine!",
+        dbConnection: mongoose.connection.readyState === 1 ? "Connected" : "Not Connected"
+    });
 });
 
-// ✅ Spare Route
-router.get("/spare", async (req, res) => {
-  try {
-    res.status(200).json({ message: 'Welcome to the Support Desk API' });
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching spares", error });
-  }
-});
-
-
- 
-app.get('/', (req, res) => {
-  res.status(200).json({ message: 'Welcome to the Backend API' });
-});
-
-// Add this BEFORE the error handler middleware
+// Catch-all route for undefined routes
 app.use('*', (req, res) => {
-  res.status(200).json({ 
-    message: 'Backend API is running',
-    endpoints: {
-      health: '/api/health',
-      solding: '/api/solding',
-      shong: '/api/shong',
-      jogini: '/api/jogini',
-      sdllpsalun: '/api/sdllpsalun',
-      kuwarsi: '/api/kuwarsi'
-    }
-  });
+    res.status(404).json({ 
+        message: 'API endpoint not found',
+        availableEndpoints: {
+            test: '/test',
+            health: '/api/health',
+            solding: '/api/solding',
+            shong: '/api/shong',
+            jogini: '/api/jogini',
+            sdllpsalun: '/api/sdllpsalun',
+            kuwarsi: '/api/kuwarsi'
+        }
+    });
 });
 
-/**
- * ✅ Error Handling Middleware
- */
+// Error handler should be last
 app.use(errorHandler);
 
 /**

@@ -1,4 +1,5 @@
 const express = require("express");
+const router = express.Router();
 const { 
     getSpareInventory,
     getAllSolding,
@@ -8,15 +9,19 @@ const {
     getAllKuwarsi
 } = require("../controllers/sparesController");
 
-const router = express.Router();
+// Test route to check if router is working
+router.get("/test", (req, res) => {
+    res.json({ message: "Spare routes working" });
+});
 
-router.get("/spares/inventory", getSpareInventory);  // API Endpoint: /api/spares/inventory
-
-// Data routes
+// Data routes - remove /api prefix since it's added in server.js
 router.get("/solding", getAllSolding);
 router.get("/shong", getAllShong);
 router.get("/jogini", getAllJogini);
 router.get("/sdllpsalun", getAllSDLLPsalun);
 router.get("/kuwarsi", getAllKuwarsi);
+
+// Existing spare route
+router.get("/inventory", getSpareInventory);
 
 module.exports = router;
