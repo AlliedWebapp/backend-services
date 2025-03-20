@@ -25,14 +25,12 @@ connectDB();
 console.log("Connected to DB:", mongoose.connection.name);
 
 // Add error handling for MongoDB connection
-mongoose.connection.on('error', (err) => {
-  console.error('MongoDB Connection Error:', err);
-  // Add more detailed logging
-  console.error('MongoDB URI:', process.env.MONGODB_URI ? 'URI is set' : 'URI is missing');
+mongoose.connection.on('connected', () => {
+    console.log('✅ MongoDB Connected successfully');
 });
 
-mongoose.connection.once('open', () => {
-  console.log('MongoDB Connected Successfully');
+mongoose.connection.on('error', (err) => {
+    console.error('❌ MongoDB Connection Error:', err);
 });
 
 const app = express();
@@ -49,39 +47,50 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-// Test route to verify server is working
-app.get("/test", (req, res) => {
-    res.json({ message: "Server is working" });
+// Debug middleware to log all requests
+app.use((req, res, next) => {
+    console.log(`${req.method} ${req.url}`);
+    next();
 });
 
-// Route registrations - only use one prefix
-app.use('/api', spareRoutes);  // This will handle all routes
+// Mount routes - IMPORTANT: Order matters!
+app.use('/api', spareRoutes);  // This will handle all /api routes
 
-// Health check route
-app.get("/api/health", (req, res) => {
-    res.status(200).json({ 
-        message: "✅ Backend is running fine!",
-        dbConnection: mongoose.connection.readyState === 1 ? "Connected" : "Not Connected"
-    });
+// Test route
+app.get('/test', (req, res) => {
+    res.json({ message: 'Server is working' });
 });
 
-// Catch-all route for undefined routes
-app.use('*', (req, res) => {
-    res.status(404).json({ 
-        message: 'API endpoint not found',
-        availableEndpoints: {
-            test: '/test',
-            health: '/api/health',
+// Root route
+app.get('/', (req, res) => {
+    res.json({ 
+        message: 'Welcome to the Support Desk API',
+        endpoints: {
+            jogini: '/api/jogini',
             solding: '/api/solding',
             shong: '/api/shong',
-            jogini: '/api/jogini',
             sdllpsalun: '/api/sdllpsalun',
             kuwarsi: '/api/kuwarsi'
         }
     });
 });
 
-// Error handler should be last
+// 404 handler - must be after all valid routes
+app.use('*', (req, res) => {
+    res.status(404).json({ 
+        message: 'Route not found',
+        availableEndpoints: {
+            root: '/',
+            jogini: '/api/jogini',
+            solding: '/api/solding',
+            shong: '/api/shong',
+            sdllpsalun: '/api/sdllpsalun',
+            kuwarsi: '/api/kuwarsi'
+        }
+    });
+});
+
+// Error handler must be last
 app.use(errorHandler);
 
 /**

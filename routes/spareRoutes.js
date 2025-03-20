@@ -9,19 +9,17 @@ const {
     getAllKuwarsi
 } = require("../controllers/sparesController");
 
-// Test route to check if router is working
+// Test route
 router.get("/test", (req, res) => {
-    res.json({ message: "Spare routes working" });
+    res.json({ message: "Routes are working" });
 });
 
-// Data routes - remove /api prefix since it's added in server.js
+// Define routes WITHOUT /api prefix
+router.get("/jogini", getAllJogini);
 router.get("/solding", getAllSolding);
 router.get("/shong", getAllShong);
-router.get("/jogini", getAllJogini);
 router.get("/sdllpsalun", getAllSDLLPsalun);
 router.get("/kuwarsi", getAllKuwarsi);
-
-// Existing spare route
 router.get("/inventory", getSpareInventory);
 
 module.exports = router;

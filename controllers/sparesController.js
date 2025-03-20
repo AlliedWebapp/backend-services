@@ -47,16 +47,16 @@ const getAllShong = async (req, res) => {
 
 // Get all Jogini data
 const getAllJogini = async (req, res) => {
+    console.log("getAllJogini route hit");
     try {
         const data = await Jogini.find();
-        console.log('Jogini data:', data);
+        console.log("Jogini data:", data);
         res.status(200).json(data);
     } catch (error) {
-        console.error('Error in getAllJogini:', error);
+        console.error("Error in getAllJogini:", error);
         res.status(500).json({ 
-            message: 'Error fetching Jogini data', 
-            error: error.message,
-            stack: process.env.NODE_ENV === 'production' ? null : error.stack
+            message: 'Error fetching Jogini data',
+            error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
         });
     }
 };
