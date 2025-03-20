@@ -5,6 +5,7 @@ const cors = require('cors'); // ✅ Import CORS
 const { errorHandler } = require('./middleware/errorMiddleware');
 const connectDB = require('./config/db');
 const path = require('path');
+const mongoose = require('mongoose');
 const spareRoutes = require('./routes/spareRoutes');
 
 const PORT = process.env.PORT || 5000;
@@ -21,22 +22,31 @@ console.log("MongoDB URI:", process.env.MONGODB_URI);
 
 // ✅ Connect to database
 connectDB();
+console.log("Connected to DB:", mongoose.connection.name);
+
+// Add error handling for MongoDB connection
+mongoose.connection.on('error', (err) => {
+  console.error('MongoDB Connection Error:', err);
+  // Add more detailed logging
+  console.error('MongoDB URI:', process.env.MONGODB_URI ? 'URI is set' : 'URI is missing');
+});
+
+mongoose.connection.once('open', () => {
+  console.log('MongoDB Connected Successfully');
+});
 
 const app = express();
 const router = express.Router();
-
-
- 
 app.use(express.json()); // Enable JSON Parsing
 app.use(express.urlencoded({ extended: false }));
 
 // ✅ CORS Configuration
 const corsOptions = {
-  origin: 'https://alliedwebapp.vercel.app',
-  credentials: true, // Access-Control-Allow-Credentials
+  origin: ['https://alliedwebapp.vercel.app', 'https://backend-services-theta.vercel.app'],
+  credentials: true,
   optionSuccessStatus: 200,
 };
-app.use(cors(corsOptions)); // Enable CORS
+app.use(cors(corsOptions));
 
 /**
  * ✅ API Routes
@@ -66,6 +76,20 @@ app.get('/', (req, res) => {
   res.status(200).json({ message: 'Welcome to the Backend API' });
 });
 
+// Add this BEFORE the error handler middleware
+app.use('*', (req, res) => {
+  res.status(200).json({ 
+    message: 'Backend API is running',
+    endpoints: {
+      health: '/api/health',
+      solding: '/api/solding',
+      shong: '/api/shong',
+      jogini: '/api/jogini',
+      sdllpsalun: '/api/sdllpsalun',
+      kuwarsi: '/api/kuwarsi'
+    }
+  });
+});
 
 /**
  * ✅ Error Handling Middleware

@@ -25,4 +25,61 @@ const getSpareInventory = async (req, res) => {
     }
 };
 
-module.exports = { getSpareInventory };
+// Get all Solding data
+const getAllSolding = async (req, res) => {
+    try {
+        const data = await solding.find();
+        res.status(200).json(data);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching Solding data', error: error.message });
+    }
+};
+
+// Get all Shong data
+const getAllShong = async (req, res) => {
+    try {
+        const data = await Shong.find();
+        res.status(200).json(data);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching Shong data', error: error.message });
+    }
+};
+
+// Get all Jogini data
+const getAllJogini = async (req, res) => {
+    try {
+        const data = await Jogini.find();
+        res.status(200).json(data);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching Jogini data', error: error.message });
+    }
+};
+
+// Get all SDLLPsalun data
+const getAllSDLLPsalun = async (req, res) => {
+    try {
+        const data = await SDLLPsalun.find();
+        res.status(200).json(data);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching SDLLPsalun data', error: error.message });
+    }
+};
+
+// Get all Kuwarsi data
+const getAllKuwarsi = async (req, res) => {
+    try {
+        const data = await Kuwarsi.find();
+        res.status(200).json(data);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching Kuwarsi data', error: error.message });
+    }
+};
+
+module.exports = {
+    getSpareInventory,
+    getAllSolding,
+    getAllShong,
+    getAllJogini,
+    getAllSDLLPsalun,
+    getAllKuwarsi
+};

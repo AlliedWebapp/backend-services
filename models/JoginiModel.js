@@ -18,5 +18,5 @@ const joginiSchema = new mongoose.Schema(
   { timestamps: true, collection: "Jogini" } // Added collection name explicitly
 );
 
-const Jogini = mongoose.model("Jogini", joginiSchema);
+const Jogini = mongoose.model("Jogini", joginiSchema, "Jogini");
 module.exports = Jogini;
