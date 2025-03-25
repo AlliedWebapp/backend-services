@@ -1,47 +1,47 @@
-const express = require('express'); // CommonJS module syntax
+/**
+ * 🚀 Express Server for Allied Web App
+ * ✅ Organized for clarity, maintainability, and deployment
+ */
+
+// ======================== [ 1️⃣ IMPORTS ] ========================
+const express = require('express');
 const colors = require('colors');
 const dotenv = require('dotenv').config();
-const cors = require('cors'); // ✅ Import CORS
-const { errorHandler } = require('./middleware/errorMiddleware');
-const connectDB = require('./config/db');
+const cors = require('cors');
 const path = require('path');
 const mongoose = require('mongoose');
+const { errorHandler } = require('./middleware/errorMiddleware');
+const connectDB = require('./config/db');
 const spareRoutes = require('./routes/spareRoutes');
 
+// ======================== [ 2️⃣ CONFIGURATION ] ========================
 const PORT = process.env.PORT || 5000;
 require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 
-// ✅ Import Mongoose Models
+console.log("🌍 MongoDB URI:", process.env.MONGODB_URI);
+
+// ======================== [ 3️⃣ IMPORT MONGOOSE MODELS ] ========================
 const solding = require("./models/soldingModel");
 const Shong = require("./models/ShongModel");
 const Jogini = require("./models/JoginiModel");
 const SDLLPsalun = require("./models/SDLLPsalunModel");
 const Kuwarsi = require("./models/KuwarsiModel");
 
-console.log("MongoDB URI:", process.env.MONGODB_URI);
-
-// ✅ Connect to database
+// ======================== [ 4️⃣ DATABASE CONNECTION ] ========================
 connectDB().then(() => {
     console.log("✅ Database Connection Initialized");
     console.log("🗂️ Using Database:", mongoose.connection.name);
 
-    // List collections after successful connection
+    // List available collections
     mongoose.connection.db.listCollections().toArray()
-        .then(collections => {
-            console.log("🗂️ Available Collections:", collections.map(col => col.name));
-        })
+        .then(collections => console.log("📂 Available Collections:", collections.map(col => col.name)))
         .catch(err => console.error("❌ Error Fetching Collections:", err));
 });
 
-mongoose.connection.once("open", () => {
-    console.log("✅ MongoDB connection established!");
-});
+mongoose.connection.once("open", () => console.log("✅ MongoDB connection established!"));
+mongoose.connection.on("error", (err) => console.error("❌ MongoDB connection error:", err));
 
-mongoose.connection.on("error", (err) => {
-    console.error("❌ MongoDB connection error:", err);
-});
-
-// MongoDB Connection Event Logging
+// Connection Event Logging
 mongoose.connection.on('connected', () => {
     console.log('✅ MongoDB Connected successfully');
     console.log({
@@ -60,41 +60,39 @@ mongoose.connection.on('error', (err) => {
     });
 });
 
+// ======================== [ 5️⃣ EXPRESS APP & MIDDLEWARE ] ========================
 const app = express();
 
-// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// CORS Configuration
+// ✅ CORS Configuration
 const corsOptions = {
     origin: ['https://alliedwebapp.vercel.app', "http://localhost:3000"],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    optionSuccessStatus: 200,
+    optionsSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
 
-// Detailed request logging middleware
+// ✅ Request Logger (for debugging)
 app.use((req, res, next) => {
-    console.log(`[${new Date().toISOString()}]`);
-    console.log(`📍 Route accessed: ${req.method} ${req.url}`);
-    console.log('📦 Request Body:', req.body);
-    console.log('🔍 Query Params:', req.query);
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    console.log('📦 Body:', req.body);
+    console.log('🔍 Query:', req.query);
     console.log('🎯 Headers:', req.headers);
     next();
 });
 
-// Mount routes - IMPORTANT: Order matters!
-app.use('/api', spareRoutes);  // This will handle all /api routes
+// ======================== [ 6️⃣ ROUTES ] ========================
+// ✅ Mount API Routes
+app.use('/api', spareRoutes);
 
-// Test route
-app.get('/test', (req, res) => {
-    res.json({ message: 'Server is working' });
-});
+// ✅ Test Route
+app.get('/test', (req, res) => res.json({ message: 'Server is working' }));
 
-// Root route
+// ✅ Root Route
 app.get('/', (req, res) => {
     res.json({
         message: 'Welcome to the Support Desk API',
@@ -109,9 +107,10 @@ app.get('/', (req, res) => {
     });
 });
 
-// 404 handler - must be after all valid routes
+// ======================== [ 7️⃣ ERROR HANDLING ] ========================
+// 404 handler
 app.use('*', (req, res) => {
-    res.status(404).json({ 
+    res.status(404).json({
         message: 'Route not found',
         availableEndpoints: {
             root: '/',
@@ -124,7 +123,7 @@ app.use('*', (req, res) => {
     });
 });
 
-// Error handling with full details
+// ✅ Global Error Handler
 app.use((err, req, res, next) => {
     console.error('🔴 Error:', err);
     res.status(err.status || 500).json({
@@ -138,9 +137,7 @@ app.use((err, req, res, next) => {
     });
 });
 
-/**
- * ✅ Start Server
- */
+// ======================== [ 8️⃣ START SERVER ] ========================
 app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
+    console.log(`🚀 Server running on port ${PORT} in ${process.env.NODE_ENV} mode`.green);
 });
