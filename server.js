@@ -42,7 +42,7 @@ app.use((req, res, next) => {
 
 // ✅ CORS Configuration
 app.use(cors({
-    origin:"https://alliedwebapp.vercel.app",
+    origin:["https://alliedwebapp.vercel.app","https://backend-services-theta.vercel.app"],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"]
@@ -114,12 +114,14 @@ app.use('*', (req, res) => {
     });
 });
 
-// 📌 Start Server
-app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
-    console.log(`📝 API available at http://localhost:${PORT}`);
-    console.log(`🔑 Login endpoint: http://localhost:${PORT}/api/users/login`);
-});
+// 📌 Start Server (Only for Local Development)
+if (process.env.NODE_ENV !== "production") {
+    app.listen(PORT, () => {
+        console.log(`🚀 Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
+        console.log(`📝 API available at http://localhost:${PORT}`);
+    });
+}
 
 // Export app for Vercel
 module.exports = app;
+
