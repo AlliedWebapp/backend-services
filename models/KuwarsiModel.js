@@ -14,6 +14,7 @@ const kuwarsiSchema = new mongoose.Schema({
     manufacture: { type: String, default: "" }, // "MAKE" -> "MANUFACTURE"
   },
   remarks: { type: String, default: "" }, // "REMARKS"
+  spareCount: { type: Number, default: 0 } 
 }, { timestamps: true }); // Adds createdAt & updatedAt fields automatically
 
 const Kuwarsi = mongoose.model("Kuwarsi", kuwarsiSchema, "Kuwarsi"); 

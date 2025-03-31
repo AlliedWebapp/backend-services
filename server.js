@@ -1,103 +1,70 @@
-/**
- * 🚀 Express Server for Allied Web App
- * ✅ Organized for clarity, maintainability, and deployment
- */
-
-// ======================== [ 1️⃣ IMPORTS ] ========================
+// 📌 Import Dependencies
 const express = require('express');
 const colors = require('colors');
 const dotenv = require('dotenv').config();
-const cors = require('cors');
+const cors = require('cors'); 
 const path = require('path');
 const mongoose = require('mongoose');
+
+// 📌 Import Local Modules
 const { errorHandler } = require('./middleware/errorMiddleware');
 const connectDB = require('./config/db');
 const spareRoutes = require('./routes/spareRoutes');
+const userRoutes = require("./routes/userRoutes");
+const ticketRoutes = require("./routes/ticketRoutes");
+const noteRoutes = require("./routes/noteRoutes");
 
-// ======================== [ 2️⃣ CONFIGURATION ] ========================
-const PORT = process.env.PORT || 5000;
+// 📌 Load Environment Variables
 require("dotenv").config({ path: path.resolve(__dirname, ".env") });
+const PORT = process.env.PORT || 5000;
 
-console.log("🌍 MongoDB URI:", process.env.MONGODB_URI);
+// ✅ Debugging Environment Variables
+console.log("🔑 JWT_SECRET:", process.env.JWT_SECRET ? "Loaded ✅" : "Missing ❌");
+console.log("📦 MONGODB_URI:", process.env.MONGODB_URI ? "Loaded ✅" : "Missing ❌");
 
-// ======================== [ 3️⃣ IMPORT MONGOOSE MODELS ] ========================
-const solding = require("./models/soldingModel");
-const Shong = require("./models/ShongModel");
-const Jogini = require("./models/JoginiModel");
-const SDLLPsalun = require("./models/SDLLPsalunModel");
-const Kuwarsi = require("./models/KuwarsiModel");
-
-// ======================== [ 4️⃣ DATABASE CONNECTION ] ========================
-connectDB().then(() => {
-    console.log("✅ Database Connection Initialized");
-    console.log("🗂️ Using Database:", mongoose.connection.name);
-
-    // List available collections
-    mongoose.connection.db.listCollections().toArray()
-        .then(collections => console.log("📂 Available Collections:", collections.map(col => col.name)))
-        .catch(err => console.error("❌ Error Fetching Collections:", err));
-});
-
-mongoose.connection.once("open", () => console.log("✅ MongoDB connection established!"));
-mongoose.connection.on("error", (err) => console.error("❌ MongoDB connection error:", err));
-
-// Connection Event Logging
-mongoose.connection.on('connected', () => {
-    console.log('✅ MongoDB Connected successfully');
-    console.log({
-        database: mongoose.connection.name,
-        host: mongoose.connection.host,
-        port: mongoose.connection.port
-    });
-});
-
-mongoose.connection.on('error', (err) => {
-    console.error('❌ MongoDB Connection Error:', {
-        error: err,
-        message: err.message,
-        code: err.code,
-        connectionString: 'MongoDB URI is ' + (process.env.MONGODB_URI ? 'set' : 'not set')
-    });
-});
-
-// ======================== [ 5️⃣ EXPRESS APP & MIDDLEWARE ] ========================
+// ✅ Initialize Express App
 const app = express();
 
+// 📌 Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// ✅ CORS Configuration
-const corsOptions = {
-    origin: ['https://alliedwebapp.vercel.app', "http://localhost:3000"],
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    optionsSuccessStatus: 200,
-};
-app.use(cors(corsOptions));
-
-// ✅ Request Logger (for debugging)
+// Detailed request logging middleware
 app.use((req, res, next) => {
-    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-    console.log('📦 Body:', req.body);
-    console.log('🔍 Query:', req.query);
-    console.log('🎯 Headers:', req.headers);
+    console.log('🔍 Request Details:');
+    console.log(`Method: ${req.method}`);
+    console.log(`URL: ${req.url}`);
+    console.log(`Headers:`, req.headers);
+    console.log(`Body:`, req.body);
+    console.log('-------------------');
     next();
 });
 
-// ======================== [ 6️⃣ ROUTES ] ========================
-// ✅ Mount API Routes
+// ✅ CORS Configuration
+app.use(cors({
+    origin:"https://alliedwebapp.vercel.app",
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
+// 📌 Connect to MongoDB
+connectDB();
+
+// 📌 API Routes
+app.use("/api/users", userRoutes);
+app.use("/api/tickets", ticketRoutes);
+app.use("/api/notes", noteRoutes);
 app.use('/api', spareRoutes);
 
-// ✅ Test Route
-app.get('/test', (req, res) => res.json({ message: 'Server is working' }));
-
-// ✅ Root Route
+// 📌 Default Root Route
 app.get('/', (req, res) => {
     res.json({
         message: 'Welcome to the Support Desk API',
         environment: process.env.NODE_ENV,
         endpoints: {
+            login: '/api/users/login',
+            register: '/api/users',
             jogini: '/api/jogini',
             solding: '/api/solding',
             shong: '/api/shong',
@@ -107,13 +74,37 @@ app.get('/', (req, res) => {
     });
 });
 
-// ======================== [ 7️⃣ ERROR HANDLING ] ========================
-// 404 handler
+// 📌 Test Route
+app.get('/test', (req, res) => {
+    res.json({ message: 'Server is working' });
+});
+
+// 📌 Serve static files in production
+if (process.env.NODE_ENV === "production") {
+    // Serve static files from the React app
+    app.use(express.static(path.join(__dirname, '../frontend/build')));
+
+    // Handle React routing, return all requests to React app
+    app.get('*', (req, res) => {
+        res.sendFile(path.resolve(__dirname, '../frontend/build', 'index.html'));
+    });
+} else {
+    // In development, just log that we're in dev mode
+    console.log('🛠️ Running in development mode - static files not served');
+}
+
+// 📌 Error Handling Middleware
+app.use(errorHandler);
+
+// 📌 404 Handler - Moved to the very end
 app.use('*', (req, res) => {
-    res.status(404).json({
+    console.log(`404 Not Found: ${req.method} ${req.url}`);
+    res.status(404).json({ 
         message: 'Route not found',
         availableEndpoints: {
             root: '/',
+            login: '/api/users/login',
+            register: '/api/users',
             jogini: '/api/jogini',
             solding: '/api/solding',
             shong: '/api/shong',
@@ -123,21 +114,12 @@ app.use('*', (req, res) => {
     });
 });
 
-// ✅ Global Error Handler
-app.use((err, req, res, next) => {
-    console.error('🔴 Error:', err);
-    res.status(err.status || 500).json({
-        success: false,
-        message: err.message,
-        stack: err.stack,
-        error: err,
-        route: req.originalUrl,
-        method: req.method,
-        timestamp: new Date().toISOString()
-    });
+// 📌 Start Server
+app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT} in ${process.env.NODE_ENV} mode`);
+    console.log(`📝 API available at http://localhost:${PORT}`);
+    console.log(`🔑 Login endpoint: http://localhost:${PORT}/api/users/login`);
 });
 
-// ======================== [ 8️⃣ START SERVER ] ========================
-app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT} in ${process.env.NODE_ENV} mode`.green);
-});
+// Export app for Vercel
+module.exports = app;
