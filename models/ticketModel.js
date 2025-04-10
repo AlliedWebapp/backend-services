@@ -71,38 +71,34 @@ const ticketSchema = mongoose.Schema(
   }
 )
 
-// Generate 6-digit ticket_id before saving
+// Generate 4-digit unique ticket_id before saving
 ticketSchema.pre('save', async function (next) {
   try {
     if (!this.ticket_id) {
-      console.log('Generating new ticket_id...');
       let isUnique = false;
       let attempts = 0;
-      const maxAttempts = 10; // Prevent infinite loops
-      
+      const maxAttempts = 10;
+
       while (!isUnique && attempts < maxAttempts) {
         attempts++;
-        // Generate a random 6-digit number between 100000 and 999999
-        const randomId = Math.floor(100000 + Math.random() * 900000);
-        console.log(`Attempt ${attempts}: Trying ticket_id ${randomId}`);
-        
-        const existing = await mongoose.models.Ticket.findOne({ ticket_id: randomId });
+        const randomId = Math.floor(1000 + Math.random() * 9000); // 4-digit
+
+        const existing = await mongoose.models.Ticket.findOne({ ticket_id: `${randomId}` });
         if (!existing) {
-          this.ticket_id = randomId;
+          this.ticket_id = `${randomId}`;
           isUnique = true;
-          console.log('✅ Successfully generated ticket_id:', randomId);
         }
       }
-      
+
       if (!isUnique) {
-        throw new Error('Could not generate a unique ticket_id after multiple attempts');
+        throw new Error('Could not generate a unique 4-digit ticket_id');
       }
     }
     next();
   } catch (error) {
-    console.error('Error in ticket_id generation:', error);
+    console.error('Error generating ticket_id:', error);
     next(error);
   }
 });
 
-module.exports = mongoose.model('Ticket', ticketSchema)
+module.exports = mongoose.model('Ticket', ticketSchema);
