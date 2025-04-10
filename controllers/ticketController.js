@@ -21,7 +21,7 @@ const getTickets = asyncHandler(async (req, res) => {
       createdAt: -1      // newest ticket at the top within each status
     });
 
-  res.status(200).json(tickets);
+  res.status(200).json(sortedtickets);
 });
 
 // @desc    Get user ticket
