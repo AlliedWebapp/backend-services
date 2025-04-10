@@ -94,7 +94,7 @@ const createTicket = asyncHandler(async (req, res) => {
     })) || [];
 
     console.log('Creating new ticket...');
-    const ticket = new Ticket({
+    const ticket = await Ticket.create({
       projectname,
       sitelocation,
       projectlocation,
@@ -107,7 +107,9 @@ const createTicket = asyncHandler(async (req, res) => {
       images,
       user: req.user.id,
       status: 'new'
-    })
+      // ❌ DO NOT pass `ticket_id` here manually!
+    });
+    
     
     await ticket.save(); // ✅ triggers the pre('save') hook and sets ticket_id
     
