@@ -5,11 +5,12 @@ const ticketSchema = mongoose.Schema(
     ticket_id: {
       type: String,
       required: true,
-      unique: true,
       default: function () {
-        return `TICKET-${Date.now()}`;
-      }
+        const random4Digit = Math.floor(1000 + Math.random() * 9000); // always 4-digit
+        return `${random4Digit}`;
+      },
     },
+    
     user: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
