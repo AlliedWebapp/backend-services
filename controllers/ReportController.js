@@ -1,4 +1,4 @@
-const FSR = require("../models/FSR"); // Your mongoose model
+const FSR = require("../models/FSRModel"); // Your mongoose model
 
 exports.submitFSR = async (req, res) => {
   try {
