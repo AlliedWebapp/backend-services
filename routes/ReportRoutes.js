@@ -5,7 +5,7 @@ const multer = require("multer");
 const storage = multer.memoryStorage();  // Store file as buffer in memory
 const upload = multer({ storage: storage });
 
-const { submitFSR } = require("../controllers/ReportsController");
+const { submitFSR } = require("../controllers/ReportController");
 
 // Match field names: single & multiple
 router.post(
