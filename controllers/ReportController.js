@@ -91,16 +91,34 @@ exports.getAllFSRs = async (req, res) => {
 };
 
 // ✅ NEW FUNCTION TO FETCH BY MONGO _id
+const Ticket = require("../models/ticketModel");
+
 exports.getFSRByMongoId = async (req, res) => {
   try {
     const { id } = req.params;
+
+    // Step 1: Find the FSR
     const report = await FSR.findById(id);
     if (!report) {
       return res.status(404).json({ message: "FSR not found" });
     }
-    res.json(report);
+
+    // Step 2: Find the Ticket using ticketId stored in FSR
+    const ticket = await Ticket.findById(report.ticketId);
+    if (!ticket) {
+      return res.status(404).json({ message: "Associated ticket not found" });
+    }
+
+    // Step 3: Replace Mongo ObjectId with custom 4-digit ticket_id
+    const updatedReport = {
+      ...report.toObject(),
+      ticketId: ticket.ticket_id  // replace with human-readable one
+    };
+
+    res.json(updatedReport);
   } catch (err) {
     console.error("Error fetching FSR by _id:", err);
     res.status(500).json({ message: "Failed to fetch FSR" });
   }
 };
+
