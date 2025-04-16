@@ -2,7 +2,7 @@
 const mongoose = require("mongoose");
 
 const fsrSchema = new mongoose.Schema({
-fsrId: { type: Number, required: true, unique: true }, // Unique 4-digit fsr_id
+fsrId: { type: Number, required: true }, // Unique 4-digit fsr_id
   ticket_id: { type: String, required: true,unique },
   srNo: String,
   customerName: String,
