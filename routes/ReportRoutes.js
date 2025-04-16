@@ -22,7 +22,8 @@ router.post(
   submitFSR // Call submitFSR function from the controller to handle submission
 );
 
-// Route to fetch a specific FSR report by fsrId
-router.get("/fsr/:fsrId", getFSRById); // 👈 GET route to fetch a specific report by fsrId
+
+// Route to fetch a specific FSR report by MongoDB _id (updated)
+router.get("/fsr/:id", getFSRById); // 👈 GET route to fetch a specific report by MongoDB _id
 
 module.exports = router;
