@@ -1,7 +1,7 @@
 const FSR = require("../models/FSRModel"); // Your mongoose model
 const { ErrorHandler } = require("../middleware/errorMiddleware");
 const ImprovementReport = require("../models/ImprovementReportModel"); // Import your model
-const MaintenanceReport = require("../models/MaintenanceReport");
+const MaintenanceReport = require("../models/MaintenanceReportModel");
 // Function to generate a 4-digit unique fsr_id
 function generateFSRId() {
   return Math.floor(1000 + Math.random() * 9000); // Generates a 4-digit number between 1000 and 9999
