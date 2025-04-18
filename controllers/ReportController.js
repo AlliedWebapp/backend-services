@@ -239,8 +239,8 @@ exports.submitMaintenanceReport = async (req, res, next) => {
       throw new ErrorHandler(400, "Missing required fields");
     }
 
-    const hodSignFile = req.files["hod_sign"]?.[0];
-    const plantSignFile = req.files["plant_incharge_sign"]?.[0];
+    const hodSignFile = req.files["hodSignature"]?.[0];
+    const plantSignFile = req.files["plantInchargeSignature"]?.[0];
 
     const mrId = generateMRId();
 
