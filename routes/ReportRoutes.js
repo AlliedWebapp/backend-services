@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const multer = require("multer");
 const ReportController = require("../controllers/ReportController");
-
+const { submitImprovementReport } = require("../controllers/ReportController");
 
 const storage = multer.memoryStorage();  // Store file as buffer in memory
 const upload = multer({ storage: storage });
