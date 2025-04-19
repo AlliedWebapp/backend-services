@@ -3,7 +3,6 @@ const { ErrorHandler } = require("../middleware/errorMiddleware");
 const ImprovementReport = require("../models/ImprovementReportModel"); // Import your model
 const MaintenanceReport = require("../models/MaintenanceReportModel");
 const mongoose = require("mongoose");
-const ImprovementReport = require("../models/ImprovementReportModel");
 
 // Function to generate a 4-digit unique fsr_id
 function generateFSRId() {
