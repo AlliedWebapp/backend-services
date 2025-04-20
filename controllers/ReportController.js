@@ -376,22 +376,19 @@ exports.getMaintenanceReportByMongoId = async (req, res, next) => {
   try {
     const { id } = req.params;
     
-    if (!id) {
-      throw new ErrorHandler(400, "Maintenance Report ID is required");
-    }
-
-    // Validate MongoDB ID format
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      throw new ErrorHandler(400, "Invalid Maintenance Report ID format");
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+      throw new ErrorHandler(400, "Invalid maintenance report ID");
     }
 
     const report = await MaintenanceReport.findById(id);
-    
     if (!report) {
-      throw new ErrorHandler(404, "Maintenance Report not found");
+      throw new ErrorHandler(404, "Maintenance report not found");
     }
 
-    res.json(report);
+    res.json({
+      success: true,
+      data: report
+    });
   } catch (err) {
     next(err);
   }
