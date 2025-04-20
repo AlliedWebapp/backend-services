@@ -393,10 +393,18 @@ exports.getMaintenanceReportByMongoId = async (req, res, next) => {
 
     // Convert signature buffers to base64 strings
     if (report.hodSignature && report.hodSignature.data) {
-      report.hodSignature = `data:${report.hodSignature.contentType};base64,${report.hodSignature.data.toString('base64')}`;
+      const base64String = Buffer.from(report.hodSignature.data).toString('base64');
+      report.hodSignature = {
+        data: `data:${report.hodSignature.contentType || 'image/jpeg'};base64,${base64String}`,
+        contentType: report.hodSignature.contentType || 'image/jpeg'
+      };
     }
     if (report.plantInchargeSignature && report.plantInchargeSignature.data) {
-      report.plantInchargeSignature = `data:${report.plantInchargeSignature.contentType};base64,${report.plantInchargeSignature.data.toString('base64')}`;
+      const base64String = Buffer.from(report.plantInchargeSignature.data).toString('base64');
+      report.plantInchargeSignature = {
+        data: `data:${report.plantInchargeSignature.contentType || 'image/jpeg'};base64,${base64String}`,
+        contentType: report.plantInchargeSignature.contentType || 'image/jpeg'
+      };
     }
 
     // Format dates
