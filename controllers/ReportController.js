@@ -372,6 +372,12 @@ exports.getAllMaintenanceReports = async (req, res, next) => {
   }
 };
 
+// Helper function to convert buffer to base64
+const bufferToBase64 = (buffer) => {
+  if (!buffer || !buffer.data) return null;
+  return `data:image/jpeg;base64,${Buffer.from(buffer.data).toString('base64')}`;
+};
+
 exports.getMaintenanceReportByMongoId = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -380,10 +386,22 @@ exports.getMaintenanceReportByMongoId = async (req, res, next) => {
       throw new ErrorHandler(400, "Invalid maintenance report ID");
     }
 
-    const report = await MaintenanceReport.findById(id);
+    const report = await MaintenanceReport.findById(id).lean();
     if (!report) {
       throw new ErrorHandler(404, "Maintenance report not found");
     }
+
+    // Convert signature buffers to base64 strings
+    if (report.hodSignature && report.hodSignature.data) {
+      report.hodSignature = `data:${report.hodSignature.contentType};base64,${report.hodSignature.data.toString('base64')}`;
+    }
+    if (report.plantInchargeSignature && report.plantInchargeSignature.data) {
+      report.plantInchargeSignature = `data:${report.plantInchargeSignature.contentType};base64,${report.plantInchargeSignature.data.toString('base64')}`;
+    }
+
+    // Format dates
+    report.outageDate = new Date(report.outageDate).toLocaleDateString();
+    report.createdAt = new Date(report.createdAt).toLocaleDateString();
 
     res.json({
       success: true,
