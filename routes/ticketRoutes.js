@@ -123,10 +123,42 @@ router.get("/:ticketId/spare-description", protect, async (req, res) => {
       });
     }
 
-    const spareDescriptions = await response.json();
+    const responseData = await response.json();
+    
+    // Ensure we have an array of spares
+    let spareDescriptions = [];
+    if (Array.isArray(responseData)) {
+      spareDescriptions = responseData;
+    } else if (responseData && typeof responseData === 'object') {
+      // If the response is an object, try to extract the array of spares
+      if (Array.isArray(responseData.spares)) {
+        spareDescriptions = responseData.spares;
+      } else if (Array.isArray(responseData.data)) {
+        spareDescriptions = responseData.data;
+      } else {
+        // If we can't find an array, try to use the object's values
+        spareDescriptions = Object.values(responseData);
+      }
+    }
+
+    if (!Array.isArray(spareDescriptions)) {
+      console.error('Invalid response format:', responseData);
+      return res.status(500).json({
+        msg: "Invalid response format",
+        error: "Could not parse spare descriptions from the response"
+      });
+    }
     
     // Map the response to a consistent format based on the collection
     const mappedDescriptions = spareDescriptions.map(spare => {
+      if (!spare || typeof spare !== 'object') {
+        return {
+          id: 'unknown',
+          description: 'Invalid spare data',
+          quantity: 0
+        };
+      }
+
       const fieldMapping = {
         'Jogini': spare.spareDescription,
         'Kuwarsi': spare.nameOfMaterials,
@@ -136,7 +168,7 @@ router.get("/:ticketId/spare-description", protect, async (req, res) => {
       };
       
       return {
-        id: spare._id,
+        id: spare._id || spare.id || 'unknown',
         description: fieldMapping[projectInfo.collection] || spare.description || spare.name || 'Unknown',
         quantity: spare.quantity || 0
       };
