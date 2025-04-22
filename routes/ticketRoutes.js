@@ -74,37 +74,37 @@ router.get("/:ticketId/spare-description", protect, async (req, res) => {
       });
     }
 
-    // Map project names to their correct collection names
+    // Map project names to their correct collection names and API endpoints
     const projectMapping = {
-      'jogini': 'Jogini',
-      'jogini-ii': 'Jogini',
-      'kuwarsi': 'Kuwarsi',
-      'kuwarsi-ii': 'Kuwarsi',
-      'jhp kuwarsi-ii': 'Kuwarsi',
-      'sdllp salun': 'SDLLPsalun',
-      'sdllpsalun': 'SDLLPsalun',
-      'shong': 'Shong',
-      'solding': 'solding'
+      'jogini': { collection: 'Jogini', endpoint: 'jogini' },
+      'jogini-ii': { collection: 'Jogini', endpoint: 'jogini' },
+      'kuwarsi': { collection: 'Kuwarsi', endpoint: 'kuwarsi' },
+      'kuwarsi-ii': { collection: 'Kuwarsi', endpoint: 'kuwarsi' },
+      'jhp kuwarsi-ii': { collection: 'Kuwarsi', endpoint: 'kuwarsi' },
+      'sdllp salun': { collection: 'SDLLPsalun', endpoint: 'sdllpsalun' },
+      'sdllpsalun': { collection: 'SDLLPsalun', endpoint: 'sdllpsalun' },
+      'shong': { collection: 'Shong', endpoint: 'shong' },
+      'solding': { collection: 'solding', endpoint: 'solding' }
     };
 
     const project = ticket.projectname.toLowerCase();
-    const collectionName = projectMapping[project];
+    const projectInfo = projectMapping[project];
 
-    if (!collectionName) {
+    if (!projectInfo) {
       return res.status(400).json({ 
         msg: "Invalid project",
         error: `Project '${project}' is not supported. Valid projects are: ${Object.keys(projectMapping).join(', ')}`
       });
     }
 
-    // Fetch spare descriptions from the spares route
-    const response = await fetch(`https://backend-services-theta.vercel.app/api/spares/spares/${collectionName}`);
+    // Fetch spare descriptions from the correct endpoint
+    const response = await fetch(`https://backend-services-theta.vercel.app/api/${projectInfo.endpoint}`);
     
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`Error from spares API: ${errorText}`);
       return res.status(response.status).json({ 
-        msg: `Error fetching spare descriptions for ${collectionName}`,
+        msg: `Error fetching spare descriptions for ${projectInfo.collection}`,
         error: errorText
       });
     }
@@ -123,7 +123,7 @@ router.get("/:ticketId/spare-description", protect, async (req, res) => {
       
       return {
         id: spare._id,
-        description: fieldMapping[collectionName] || spare.description || spare.name || 'Unknown',
+        description: fieldMapping[projectInfo.collection] || spare.description || spare.name || 'Unknown',
         quantity: spare.quantity || 0
       };
     });
