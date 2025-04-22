@@ -47,30 +47,36 @@ router.get("/:ticketId/images/:index", protect, async (req, res) => {
   }
 });
 // Add a new route to fetch spare descriptions
-router.get("/:ticketId/spare-description", protect, getSpareDescriptions);
-
-
+router.get("/:ticketId/spare-description", protect, async (req, res) => {
   try {
-    const ticket = await require("../models/ticketModel").findById(ticketId);
+    const ticket = await require("../models/ticketModel").findById(req.params.ticketId);
     if (!ticket) {
       return res.status(404).json({ msg: "Ticket not found" });
     }
 
-    const project = ticket.project.toLowerCase();  // Get the project name (e.g., 'jogini')
+    const project = ticket.projectname.toLowerCase();  // Get the project name (e.g., 'jogini')
 
-    // Fetch spare descriptions from the spares route (using the project/collection name)
-    const response = await fetch(`http://your-backend-url/api/spares/spares/${project}`);
-    const spareDescriptions = await response.json();
-
-    if (response.ok) {
-      return res.status(200).json(spareDescriptions);  // Send the spare descriptions back to frontend
-    } else {
-      return res.status(400).json({ msg: `Error fetching spare descriptions for ${project}` });
+    // Fetch spare descriptions from the appropriate collection
+    const collectionMapping = {
+      jogini: 'spareDescription',
+      solding: 'descriptionOfMaterial',
+      shong: 'descriptionOfMaterial',
+      sdllpsalun: 'nameOfMaterials',
+      kuwarsi: 'nameOfMaterials'
     }
+
+    const collectionName = collectionMapping[project]
+    const ProjectModel = mongoose.model(project)  // Dynamically fetch the model
+
+    const spareDescriptions = await ProjectModel.find({})  // Fetch spare descriptions
+    const spareDescriptionsList = spareDescriptions.map(item => item[collectionName])
+
+    res.status(200).json(spareDescriptionsList);  // Send the spare descriptions back to frontend
   } catch (err) {
     console.error(err);
     res.status(500).send("Server Error");
-  };
+  }
+});
 
 
 module.exports = router;
