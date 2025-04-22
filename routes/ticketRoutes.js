@@ -76,15 +76,51 @@ router.get("/:ticketId/spare-description", protect, async (req, res) => {
 
     // Map project names to their correct collection names and API endpoints
     const projectMapping = {
-      'jogini': { collection: 'Jogini', endpoint: 'jogini' },
-      'jogini-ii': { collection: 'Jogini', endpoint: 'jogini' },
-      'kuwarsi': { collection: 'Kuwarsi', endpoint: 'kuwarsi' },
-      'kuwarsi-ii': { collection: 'Kuwarsi', endpoint: 'kuwarsi' },
-      'jhp kuwarsi-ii': { collection: 'Kuwarsi', endpoint: 'kuwarsi' },
-      'sdllp salun': { collection: 'SDLLPsalun', endpoint: 'sdllpsalun' },
-      'sdllpsalun': { collection: 'SDLLPsalun', endpoint: 'sdllpsalun' },
-      'shong': { collection: 'Shong', endpoint: 'shong' },
-      'solding': { collection: 'solding', endpoint: 'solding' }
+      'jogini': { 
+        collection: 'Jogini', 
+        endpoint: 'jogini',
+        descriptionField: 'spareDescription'
+      },
+      'jogini-ii': { 
+        collection: 'Jogini', 
+        endpoint: 'jogini',
+        descriptionField: 'spareDescription'
+      },
+      'kuwarsi': { 
+        collection: 'Kuwarsi', 
+        endpoint: 'kuwarsi',
+        descriptionField: 'nameOfMaterials'
+      },
+      'kuwarsi-ii': { 
+        collection: 'Kuwarsi', 
+        endpoint: 'kuwarsi',
+        descriptionField: 'nameOfMaterials'
+      },
+      'jhp kuwarsi-ii': { 
+        collection: 'Kuwarsi', 
+        endpoint: 'kuwarsi',
+        descriptionField: 'nameOfMaterials'
+      },
+      'sdllp salun': { 
+        collection: 'SDLLPsalun', 
+        endpoint: 'sdllpsalun',
+        descriptionField: 'nameOfMaterials'
+      },
+      'sdllpsalun': { 
+        collection: 'SDLLPsalun', 
+        endpoint: 'sdllpsalun',
+        descriptionField: 'nameOfMaterials'
+      },
+      'shong': { 
+        collection: 'Shong', 
+        endpoint: 'shong',
+        descriptionField: 'descriptionOfMaterial'
+      },
+      'solding': { 
+        collection: 'solding', 
+        endpoint: 'solding',
+        descriptionField: 'descriptionOfMaterial'
+      }
     };
 
     const project = ticket.projectname.toLowerCase();
@@ -124,6 +160,7 @@ router.get("/:ticketId/spare-description", protect, async (req, res) => {
     }
 
     const responseData = await response.json();
+    console.log('Raw response data:', responseData); // Debug log
     
     // Ensure we have an array of spares
     let spareDescriptions = [];
@@ -159,21 +196,20 @@ router.get("/:ticketId/spare-description", protect, async (req, res) => {
         };
       }
 
-      const fieldMapping = {
-        'Jogini': spare.spareDescription,
-        'Kuwarsi': spare.nameOfMaterials,
-        'SDLLPsalun': spare.nameOfMaterials,
-        'Shong': spare.descriptionOfMaterial,
-        'solding': spare.descriptionOfMaterial
-      };
-      
+      // Get the description using the correct field name for this collection
+      const description = spare[projectInfo.descriptionField] || 
+                         spare.description || 
+                         spare.name || 
+                         'Unknown';
+
       return {
         id: spare._id || spare.id || 'unknown',
-        description: fieldMapping[projectInfo.collection] || spare.description || spare.name || 'Unknown',
+        description: description,
         quantity: spare.quantity || 0
       };
     });
 
+    console.log('Mapped descriptions:', mappedDescriptions); // Debug log
     return res.status(200).json(mappedDescriptions);
   } catch (err) {
     console.error("Error in spare-description route:", err);
