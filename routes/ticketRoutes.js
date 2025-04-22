@@ -97,8 +97,22 @@ router.get("/:ticketId/spare-description", protect, async (req, res) => {
       });
     }
 
-    // Fetch spare descriptions from the correct endpoint
-    const response = await fetch(`https://backend-services-theta.vercel.app/api/${projectInfo.endpoint}`);
+    // Get the authorization token from the request headers
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(401).json({ 
+        msg: "Unauthorized",
+        error: "Authorization token is missing"
+      });
+    }
+
+    // Fetch spare descriptions from the correct endpoint with authorization
+    const response = await fetch(`https://backend-services-theta.vercel.app/api/${projectInfo.endpoint}`, {
+      headers: {
+        'Authorization': authHeader,
+        'Content-Type': 'application/json'
+      }
+    });
     
     if (!response.ok) {
       const errorText = await response.text();
