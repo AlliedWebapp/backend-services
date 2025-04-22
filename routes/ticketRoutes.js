@@ -74,142 +74,73 @@ router.get("/:ticketId/spare-description", protect, async (req, res) => {
       });
     }
 
-    // Map project names to their correct collection names and API endpoints
-    const projectMapping = {
+    // Mapping of collections to their models and field names
+    const collectionMapping = {
       'jogini': { 
-        collection: 'Jogini', 
-        endpoint: 'jogini',
-        descriptionField: 'spareDescription'
+        model: require("../models/Jogini"),
+        field: 'spareDescription'
       },
       'jogini-ii': { 
-        collection: 'Jogini', 
-        endpoint: 'jogini',
-        descriptionField: 'spareDescription'
+        model: require("../models/Jogini"),
+        field: 'spareDescription'
       },
       'kuwarsi': { 
-        collection: 'Kuwarsi', 
-        endpoint: 'kuwarsi',
-        descriptionField: 'nameOfMaterials'
+        model: require("../models/Kuwarsi"),
+        field: 'nameOfMaterials'
       },
       'kuwarsi-ii': { 
-        collection: 'Kuwarsi', 
-        endpoint: 'kuwarsi',
-        descriptionField: 'nameOfMaterials'
+        model: require("../models/Kuwarsi"),
+        field: 'nameOfMaterials'
       },
       'jhp kuwarsi-ii': { 
-        collection: 'Kuwarsi', 
-        endpoint: 'kuwarsi',
-        descriptionField: 'nameOfMaterials'
+        model: require("../models/Kuwarsi"),
+        field: 'nameOfMaterials'
       },
       'sdllp salun': { 
-        collection: 'SDLLPsalun', 
-        endpoint: 'sdllpsalun',
-        descriptionField: 'nameOfMaterials'
+        model: require("../models/SDLLPsalun"),
+        field: 'nameOfMaterials'
       },
       'sdllpsalun': { 
-        collection: 'SDLLPsalun', 
-        endpoint: 'sdllpsalun',
-        descriptionField: 'nameOfMaterials'
+        model: require("../models/SDLLPsalun"),
+        field: 'nameOfMaterials'
       },
       'shong': { 
-        collection: 'Shong', 
-        endpoint: 'shong',
-        descriptionField: 'descriptionOfMaterial'
+        model: require("../models/Shong"),
+        field: 'descriptionOfMaterial'
       },
       'solding': { 
-        collection: 'solding', 
-        endpoint: 'solding',
-        descriptionField: 'descriptionOfMaterial'
+        model: require("../models/Solding"),
+        field: 'descriptionOfMaterial'
       }
     };
 
     const project = ticket.projectname.toLowerCase();
-    const projectInfo = projectMapping[project];
+    const collectionInfo = collectionMapping[project];
 
-    if (!projectInfo) {
+    if (!collectionInfo) {
       return res.status(400).json({ 
         msg: "Invalid project",
-        error: `Project '${project}' is not supported. Valid projects are: ${Object.keys(projectMapping).join(', ')}`
+        error: `Project '${project}' is not supported. Valid projects are: ${Object.keys(collectionMapping).join(', ')}`
       });
     }
 
-    // Get the authorization token from the request headers
-    const authHeader = req.headers.authorization;
-    if (!authHeader) {
-      return res.status(401).json({ 
-        msg: "Unauthorized",
-        error: "Authorization token is missing"
-      });
-    }
-
-    // Fetch spare descriptions from the correct endpoint with authorization
-    const response = await fetch(`https://backend-services-theta.vercel.app/api/${projectInfo.endpoint}`, {
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': 'application/json'
-      }
-    });
+    // Fetch spares directly from the collection
+    const spares = await collectionInfo.model.find({}, `${collectionInfo.field} _id quantity`);
     
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`Error from spares API: ${errorText}`);
-      return res.status(response.status).json({ 
-        msg: `Error fetching spare descriptions for ${projectInfo.collection}`,
-        error: errorText
+    if (!spares || spares.length === 0) {
+      return res.status(404).json({ 
+        msg: "No spares found",
+        error: `No spares found for project ${project}`
       });
     }
 
-    const responseData = await response.json();
-    console.log('Raw response data:', responseData); // Debug log
-    
-    // Ensure we have an array of spares
-    let spareDescriptions = [];
-    if (Array.isArray(responseData)) {
-      spareDescriptions = responseData;
-    } else if (responseData && typeof responseData === 'object') {
-      // If the response is an object, try to extract the array of spares
-      if (Array.isArray(responseData.spares)) {
-        spareDescriptions = responseData.spares;
-      } else if (Array.isArray(responseData.data)) {
-        spareDescriptions = responseData.data;
-      } else {
-        // If we can't find an array, try to use the object's values
-        spareDescriptions = Object.values(responseData);
-      }
-    }
+    // Map the response to a consistent format
+    const mappedDescriptions = spares.map(spare => ({
+      id: spare._id,
+      description: spare[collectionInfo.field] || 'Unknown',
+      quantity: spare.quantity || 0
+    }));
 
-    if (!Array.isArray(spareDescriptions)) {
-      console.error('Invalid response format:', responseData);
-      return res.status(500).json({
-        msg: "Invalid response format",
-        error: "Could not parse spare descriptions from the response"
-      });
-    }
-    
-    // Map the response to a consistent format based on the collection
-    const mappedDescriptions = spareDescriptions.map(spare => {
-      if (!spare || typeof spare !== 'object') {
-        return {
-          id: 'unknown',
-          description: 'Invalid spare data',
-          quantity: 0
-        };
-      }
-
-      // Get the description using the correct field name for this collection
-      const description = spare[projectInfo.descriptionField] || 
-                         spare.description || 
-                         spare.name || 
-                         'Unknown';
-
-      return {
-        id: spare._id || spare.id || 'unknown',
-        description: description,
-        quantity: spare.quantity || 0
-      };
-    });
-
-    console.log('Mapped descriptions:', mappedDescriptions); // Debug log
     return res.status(200).json(mappedDescriptions);
   } catch (err) {
     console.error("Error in spare-description route:", err);
