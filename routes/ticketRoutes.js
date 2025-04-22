@@ -46,9 +46,9 @@ router.get("/:ticketId/images/:index", protect, async (req, res) => {
     res.status(500).send("Server Error");
   }
 });
-// **New Route** to fetch spare descriptions (based on collection)
-router.get("/:ticketId/spare-description", protect, async (req, res) => {
-  const { ticketId } = req.params;
+// Add a new route to fetch spare descriptions
+router.get("/:ticketId/spare-description", protect, getSpareDescriptions);
+
 
   try {
     const ticket = await require("../models/ticketModel").findById(ticketId);
@@ -70,8 +70,8 @@ router.get("/:ticketId/spare-description", protect, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).send("Server Error");
-  }
-});
+  };
+
 
 module.exports = router;
 
