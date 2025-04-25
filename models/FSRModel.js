@@ -20,6 +20,10 @@ fsrId: { type: Number, required: true, unique: true }, // Unique 4-digit fsr_id
   taskEnd: Date,
   problemSummary: String,
   natureOfFailure: String,
+  spareused: {
+    type: String,
+    required: true,
+  },
   checklist: String,
   engineerRemarks: String,
   customerRemarks: String,
