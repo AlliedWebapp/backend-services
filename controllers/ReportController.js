@@ -38,7 +38,7 @@ exports.submitFSR = async (req, res, next) => {
       taskEnd,
       problemSummary,
       natureOfFailure,
-      spareused,
+      spareused,  
       checklist,
       engineerRemarks,
       customerRemarks,
@@ -47,6 +47,16 @@ exports.submitFSR = async (req, res, next) => {
       customerEmail,
       ticketId
     } = req.body;
+
+    // Check if a service report already exists for this ticket
+    const existingReport = await FSR.findOne({ ticketId });
+    if (existingReport) {
+      return res.status(400).json({
+        success: false,
+        message: "Service report already exists for this ticket",
+        error: "A service report has already been submitted for this ticket. Only one service report is allowed per ticket."
+      });
+    }
 
     // Validate required fields
     if (!customerName || !installationAddress || !siteId || !engineerName) {
@@ -63,7 +73,7 @@ exports.submitFSR = async (req, res, next) => {
 
     // Create new FSR report with generated fsr_id
     const newReport = new FSR({
-      fsrId,  // Add the unique 4-digit fsr_id
+      fsrId,
       ticketId,
       customerName,
       installationAddress,
@@ -95,10 +105,18 @@ exports.submitFSR = async (req, res, next) => {
     // Save the new report to the database
     await newReport.save();
     res.status(201).json({ 
+      success: true,
       message: "FSR submitted successfully!",
       fsrId: newReport.fsrId
     });
   } catch (err) {
+    if (err.code === 11000) { // MongoDB duplicate key error
+      return res.status(400).json({
+        success: false,
+        message: "Service report already exists for this ticket",
+        error: "A service report has already been submitted for this ticket. Only one service report is allowed per ticket."
+      });
+    }
     next(err);
   }
 };

@@ -2,8 +2,8 @@
 const mongoose = require("mongoose");
 
 const fsrSchema = new mongoose.Schema({
-fsrId: { type: Number, required: true, unique: true }, // Unique 4-digit fsr_id
-  ticketId: { type: String, required: true },
+  fsrId: { type: Number, required: true, unique: true }, // Unique 4-digit fsr_id
+  ticketId: { type: String, required: true, unique: true }, // Ensure only one FSR per ticket
   srNo: String,
   customerName: String,
   installationAddress: String,
@@ -20,10 +20,6 @@ fsrId: { type: Number, required: true, unique: true }, // Unique 4-digit fsr_id
   taskEnd: Date,
   problemSummary: String,
   natureOfFailure: String,
-  spareused: {
-    type: String,
-    required: true,
-  },
   checklist: String,
   engineerRemarks: String,
   customerRemarks: String,
@@ -40,6 +36,9 @@ fsrId: { type: Number, required: true, unique: true }, // Unique 4-digit fsr_id
     default: Date.now,
   },
 });
+
+// Add a compound index to ensure ticketId is unique
+fsrSchema.index({ ticketId: 1 }, { unique: true });
 
 const FSR = mongoose.model("FSR", fsrSchema, "fsrs");
 module.exports = FSR;
