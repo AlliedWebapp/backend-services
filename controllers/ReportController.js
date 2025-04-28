@@ -166,6 +166,28 @@ exports.getFSRByMongoId = async (req, res, next) => {
     next(err);
   }
 };
+// NEW FUNCTION: Check if FSR exists for a ticket
+exports.checkFSRExists = async (req, res, next) => {
+  try {
+    const { ticketId } = req.params;
+
+    if (!ticketId) {
+      throw new ErrorHandler(400, "Ticket ID is required");
+    }
+
+    const existingReport = await FSR.findOne({ ticketId });
+
+    if (existingReport) {
+      return res.json({ exists: true, message: "Service report already submitted for this ticket." });
+    } else {
+      return res.json({ exists: false });
+    }
+  } catch (err) {
+    next(err);
+  }
+};
+
+
 
 
 //improvement report
