@@ -1,18 +1,18 @@
-const JoginiModel = require("../models/JoginiModel");
-const ShongModel = require("../models/ShongModel");
-const soldingModel = require("../models/soldingModel");
-const SDLLPsalunModel = require("../models/SDLLPsalunModel");
-const KuwarsiModel = require("../models/KuwarsiModel");
+const Jogini = require("../models/Jogini");
+const Shong = require("../models/Shong");
+const solding = require("../models/solding");
+const SDLLPsalun = require("../models/SDLLPsalun");
+const Kuwarsi = require("../models/Kuwarsi");
 const UserSpareCount = require("../models/UserSpareCount");
 const mongoose = require("mongoose");
 
 // map the exact collectionName strings → your Mongoose models
 const MODEL_MAP = {
-    jogini:     JoginiModel,
-    solding:    SoldingModel,
-    shong:      ShongModel,
-    sdllpsalun: SDLLPSalunModel,
-    kuwarsi:    KuwarsiModel,
+    jogini:     Jogini,
+    solding:    solding,
+    shong:      Shong,
+    sdllpsalun: SDLLPsalun,
+    kuwarsi:    Kuwarsi,
   };
 
 
