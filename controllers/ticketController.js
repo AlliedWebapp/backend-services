@@ -1,18 +1,18 @@
 const asyncHandler = require('express-async-handler')
+
 const User = require('../models/userModel')
 const Ticket = require('../models/ticketModel')
-const mongoose = require('mongoose')
 
 // @desc    Get user tickets
 // @route   GET /api/tickets
 // @access  Private
 const getTickets = asyncHandler(async (req, res) => {
   // Get user using the id and JWT
-  const user = await User.findById(req.user.id)
+  const user = await User.findById(req.user.id);
 
   if (!user) {
-    res.status(401)
-    throw new Error('User not found')
+    res.status(401);
+    throw new Error('User not found');
   }
 
   const tickets = await Ticket.aggregate([
@@ -25,10 +25,11 @@ const getTickets = asyncHandler(async (req, res) => {
       }
     },
     { $sort: { statusPriority: 1, createdAt: -1 } } // new first, then recent
-  ])
+  ]);
+  
 
-  res.status(200).json(tickets)
-})
+  res.status(200).json(tickets);
+});
 
 // @desc    Get user ticket
 // @route   GET /api/tickets/:id
@@ -49,12 +50,13 @@ const getTicket = asyncHandler(async (req, res) => {
     throw new Error('Ticket not found')
   }
 
+
   // Check if ticket belongs to user
   if (ticket.user.toString() !== req.user.id) {
     res.status(401)
     throw new Error('Not authorized')
   }
-
+  
   res.status(200).json(ticket)
 })
 
@@ -72,12 +74,12 @@ const createTicket = asyncHandler(async (req, res) => {
       description, 
       date, 
       spare, 
-      rating 
+      rating,
     } = req.body
 
-    // Get uploaded files from multer
-    const imageFiles = req.files
-    const imagePaths = imageFiles.map((file) => file.path) // save path to DB
+   // Get uploaded files from multer
+  const imageFiles = req.files;
+  const imagePaths = imageFiles.map((file) => file.path); // save path to DB
 
     if (!projectname || !sitelocation || !projectlocation || !fault || !issue || !description || !date || !spare || !rating) {
       res.status(400)
@@ -92,42 +94,12 @@ const createTicket = asyncHandler(async (req, res) => {
       throw new Error('User not found')
     }
 
-    // Check if projectname is one of the predefined project collections
-    const validProjects = ['jogini', 'solding', 'shong', 'sdllpsalun', 'kuwarsi']
-    if (!validProjects.includes(projectname.toLowerCase())) {
-      res.status(400)
-      throw new Error('Invalid project name')
-    }
-
-    // Dynamically fetch spare descriptions based on project name
-    const collectionMapping = {
-      jogini: 'spareDescription',
-      solding: 'descriptionOfMaterial',
-      shong: 'descriptionOfMaterial',
-      sdllpsalun: 'nameOfMaterials',
-      kuwarsi: 'nameOfMaterials'
-    }
-
-    const collectionName = collectionMapping[projectname.toLowerCase()]
-
-    const ProjectModel = mongoose.model(projectname.toLowerCase()) // Dynamically get model
-    const spareDescriptions = await ProjectModel.find({}) // Fetch spare descriptions from the collection
-    const spareDescriptionsList = spareDescriptions.map((item) => item[collectionName])
-
-    // Get the spare used from the provided list
-    const isSpareValid = spareDescriptionsList.includes(spare)
-
-    if (!isSpareValid) {
-      res.status(400)
-      throw new Error('Invalid spare used')
-    }
-
     const images = req.files?.map(file => ({
       data: file.buffer,
       contentType: file.mimetype,
-    })) || []
+    })) || [];
 
-    console.log('Creating new ticket...')
+    console.log('Creating new ticket...');
     const ticket = await Ticket.create({
       projectname,
       sitelocation,
@@ -141,18 +113,20 @@ const createTicket = asyncHandler(async (req, res) => {
       images,
       user: req.user.id,
       status: 'new'
-    })
+      // ❌ DO NOT pass `ticket_id` here manually!
+    });
     
-    await ticket.save() // ✅ triggers the pre('save') hook and sets ticket_id
-
-    console.log('Ticket created successfully:', ticket)
+    
+    await ticket.save(); // ✅ triggers the pre('save') hook and sets ticket_id
+    
+    console.log('Ticket created successfully:', ticket);
     res.status(201).json(ticket)
   } catch (error) {
-    console.error('Error creating ticket:', error)
+    console.error('Error creating ticket:', error);
     res.status(500).json({
       message: 'Error creating ticket',
       error: error.message
-    })
+    });
   }
 })
 
