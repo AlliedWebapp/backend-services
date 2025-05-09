@@ -89,12 +89,13 @@ app.get('/test', (req, res) => {
 // 📌 Serve static files in production
 if (process.env.NODE_ENV === "production") {
     // Serve static files from the React app
-    app.use(express.static(path.join(__dirname, '../frontend/build')));
+    const buildPath = path.join(__dirname, 'frontend', 'build');
+    app.use(express.static(buildPath));
 
-    // Handle React routing, return all requests to React app
-    app.get('*', (req, res) => {
-        res.sendFile(path.resolve(__dirname, '../frontend/build', 'index.html'));
-    });
+  // 2) for any other GET, send back React's index.html
+  app.get('/*', (req, res) => {
+    res.sendFile(path.join(buildPath, 'index.html'));
+});
 } else {
     // In development, just log that we're in dev mode
     console.log('🛠️ Running in development mode - static files not served');
