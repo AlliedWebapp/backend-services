@@ -60,8 +60,9 @@ connectDB();
 app.use("/api/users", userRoutes);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/notes", noteRoutes);
+app.use("/api/reports", reportRoutes);
 app.use('/api', spareRoutes);
-app.use("/api/reports", reportRoutes); // ✅ Mount at /api/reports
+
 
 
 // 📌 Default Root Route
