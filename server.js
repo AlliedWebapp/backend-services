@@ -14,7 +14,7 @@ const spareRoutes = require('./routes/spareRoutes');
 const userRoutes = require("./routes/userRoutes");
 const ticketRoutes = require("./routes/ticketRoutes");
 const noteRoutes = require("./routes/noteRoutes");
-const reportRoutes = require("./routes/ReportRoutes"); // 👈 Make sure the path is correct
+const reportRoutes = require("./routes/ReportRoutes"); 
 const FormatsRoutes = require('./routes/FormatsRoutes');
 
 // 📌 Load Environment Variables
@@ -65,7 +65,6 @@ app.use("/api/reports", reportRoutes);
 app.use('/api', spareRoutes);
 app.use('/api/formats', FormatsRoutes);
 app.use('/api/qa', qaRoutes);
-
 
 
 // 📌 Default Root Route
