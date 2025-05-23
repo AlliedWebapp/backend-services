@@ -13,7 +13,6 @@ const upload = require('../middleware/uploadMiddleware');
 
 router.use(protect, blockInventoryOnly);
 
-// Re-route into note router for ticket-related notes
 const noteRouter = require("./noteRoutes");
 router.use("/:ticketId/notes", noteRouter);
 
@@ -40,11 +39,17 @@ router.get("/:ticketId/images/:index", async (req, res) => {
 
     const image = ticket.images[index];
 
-    // If image is stored as plain Buffer (which multer does), no .data needed
-    res.set("Content-Type", image.contentType || "image/jpeg");
-    res.send(Buffer.from(image.data)); // Force sending raw binary    
+    // Set appropriate headers
+    res.set({
+      "Content-Type": image.contentType || "image/jpeg",
+      "Cache-Control": "public, max-age=31536000", // Cache for 1 year
+      "Access-Control-Allow-Origin": "*" // Allow cross-origin requests
+    });
+
+    // Send the image buffer
+    res.send(Buffer.from(image.data));
   } catch (error) {
-    console.error(error);
+    console.error("Error serving image:", error);
     res.status(500).send("Server Error");
   }
 });
