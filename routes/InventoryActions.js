@@ -1,4 +1,6 @@
 const express = require("express");
+
+const {protect, inventoryAccess} = require("../middleware/authMiddleware");
 const Jogini = require("../models/JoginiModel");
 const Shong = require("../models/ShongModel");
 const Solding = require("../models/soldingModel");
@@ -9,6 +11,7 @@ const router = express.Router();
 const adminEmails = ["bhaskarudit02@gmail.com", "ss@gmail.com"];
 
 
+router.use(protect, inventoryAccess);
 
 // ─── Jogini CRUD ─────────────────────────────────────────────────────────────
 // POST /api/inventory/jogini
