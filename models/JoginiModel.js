@@ -18,6 +18,7 @@ Make: {
     "rate" : { type: String, default: "" },
     "instock" : { type: String, default: "" },
     "remarks" : { type: String, default: "" },
+    "MSL (Maximum Stock Level - To be required always at site as per urgency) ( QTY )": { type: Number, default: 0 },
     SIGN: { type: String, trim: true },
     spareCount: { type: Number, default: 0 },
     picture: { data: Buffer, contentType: String },
@@ -25,13 +26,13 @@ Make: {
 
 joginiSchema.pre("validate", async function(next) {
   if (this.isNew) {
-    // Find the doc with the highest "S.No"
+  
     const last = await this.constructor
       .findOne({}, { "S.No": 1 })
       .sort({ "S.No": -1 })
       .lean();
 
-    // If we got one back, bump it; otherwise start at 1
+  
     this["S.No"] = last && typeof last["S.No"] === "number"
       ? last["S.No"] + 1
       : 1;
