@@ -8,11 +8,15 @@ const {
     getAllSDLLPsalun,
     getAllKuwarsi,
     updatespareCount,
-    getUserSpareCounts
+    getUserSpareCounts,
+    searchJogini,
+    searchShong,
+    searchSolding,
+    searchSDLLPsalun,
+    searchKuwarsi
 } = require("../controllers/sparesController");
 const { protect,inventoryAccess } = require("../middleware/authMiddleware");
 
-// Debug route to test API
 router.get("/debug", (req, res) => {
     res.json({
         message: "API is working in development mode",
@@ -41,5 +45,12 @@ router.get("/shong", protect, inventoryAccess, getAllShong);
 router.get("/sdllpsalun", protect, inventoryAccess, getAllSDLLPsalun);
 router.get("/kuwarsi", protect, inventoryAccess, getAllKuwarsi);
 router.get("/inventory", protect, inventoryAccess, getSpareInventory);
+
+// --- SEARCH ENDPOINTS FOR AUTOCOMPLETE ---
+router.get("/jogini/search", protect, inventoryAccess, searchJogini);
+router.get("/shong/search", protect, inventoryAccess, searchShong);
+router.get("/solding/search", protect, inventoryAccess, searchSolding);
+router.get("/sdllpsalun/search", protect, inventoryAccess, searchSDLLPsalun);
+router.get("/kuwarsi/search", protect, inventoryAccess, searchKuwarsi);
 
 module.exports = router;
