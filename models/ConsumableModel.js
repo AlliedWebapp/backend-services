@@ -31,7 +31,7 @@ const consumableSchema = new mongoose.Schema({
   },
 });
 
-// Auto-generate sr_no before saving
+
 consumableSchema.pre("save", async function (next) {
   if (this.isNew) {
     const lastRecord = await this.constructor.findOne().sort({ sr_no: -1 });
