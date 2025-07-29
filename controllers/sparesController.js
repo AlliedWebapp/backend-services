@@ -351,7 +351,7 @@ const updatespareCount = async (req, res) => {
 
         if (!userSpareCount) {
             console.log(`Creating new user-specific spare count for user ${userName} (${userEmail})`);
-            // Create new user-specific SpareCount starting at 0
+       
             userSpareCount = await UserSpareCount.create({
                 userId,
                 userName,
@@ -362,7 +362,7 @@ const updatespareCount = async (req, res) => {
             });
             console.log("Created new spare count:", userSpareCount);
         } else {
-            // Update user info in case it has changed
+        
             userSpareCount.userName = userName;
             userSpareCount.userEmail = userEmail;
             await userSpareCount.save(); // Save the updated user info
@@ -404,7 +404,7 @@ const updatespareCount = async (req, res) => {
     }
 };
 
-// Function to get user-specific SpareCounts for a collection
+
 const getUserSpareCounts = async (req, res) => {
     try {
         const { collectionName } = req.params;
@@ -584,7 +584,7 @@ const searchSDLLPsalun = async (req, res) => {
     }
 };
 
-// Kuwarsi search
+
 const searchKuwarsi = async (req, res) => {
     try {
         const q = req.query.query || '';
