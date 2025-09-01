@@ -99,6 +99,7 @@ const createTicket = asyncHandler(async (req, res) => {
       total_km_driven
     } = req.body
 
+    
     const imageFiles = req.files;
     const images = imageFiles?.map(file => ({
       data: file.buffer,
@@ -169,21 +170,6 @@ const createTicket = asyncHandler(async (req, res) => {
           console.log("SPARE NOT FOUND AFTER DECREMENT");
         }
         console.log("======================================================");
-
-        
-        const UserSpareCount = require('../models/UserSpareCount');
-        const collectionName = collectionModel.collection.collectionName.toLowerCase();
-        await UserSpareCount.findOneAndUpdate(
-          {
-            userId: req.user.id, 
-            collectionName,
-            itemId: spare
-          },
-          { $inc: { spareCount: -quantity } },
-          { upsert: true, new: true }
-        );
-        const userSpare = await UserSpareCount.findOne({ userId: req.user.id, collectionName, itemId: spare });
-        console.log("UserSpareCount after decrement:", userSpare);
       }
     } catch (err) {
       console.error("Error decrementing spare count:", err);
