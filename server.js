@@ -24,7 +24,7 @@ const draftRoutes = require('./routes/draftRoutes');
 
 // 📌 Load Environment Variables
 require("dotenv").config({ path: path.resolve(__dirname, ".env") });
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5100;
 
 // ✅ Debugging Environment Variables
 console.log("🔑 JWT_SECRET:", process.env.JWT_SECRET ? "Loaded ✅" : "Missing ❌");
