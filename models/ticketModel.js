@@ -41,7 +41,7 @@ const ticketSchema = new mongoose.Schema(
       type: Date,
       required: [true, 'Please select a date']
     },
-    // Optional fields
+    
     spare: {
       type: String,
       required: false
@@ -76,6 +76,14 @@ const ticketSchema = new mongoose.Schema(
       {
         data: Buffer,
         contentType: String
+      }
+    ],
+    attachments: [
+      {
+        data: Buffer,
+        contentType: String,
+        originalName: String,
+        size: Number
       }
     ],
     status: {
