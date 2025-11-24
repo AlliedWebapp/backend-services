@@ -21,8 +21,14 @@ const requireUser = async (req) => {
   return user;
 };
 
-const requireTicket = async (ticketId, { lean = false } = {}) => {
-  const query = lean ? Ticket.findById(ticketId).lean() : Ticket.findById(ticketId);
+const requireTicket = async (ticketId, { lean = false, select } = {}) => {
+  let query = Ticket.findById(ticketId);
+  if (select) {
+    query = query.select(select);
+  }
+  if (lean) {
+    query = query.lean();
+  }
   const ticket = await query;
   if (!ticket) {
     throw httpError(404, 'Ticket not found');
@@ -97,7 +103,7 @@ const decrementSpareCount = async (projectname, spareId, quantity) => {
 };
 
 const updateConsumableUsage = async (consumableId, fuelConsumed, distanceDriven) => {
-  if (!consumableId || !fuelConsumed) return;
+  if (!consumableId || !Number.isFinite(fuelConsumed)) return;
   try {
     const Consumable = require('../models/ConsumableModel');
     const consumableDoc = await Consumable.findById(consumableId);
@@ -131,21 +137,48 @@ const updateConsumableUsage = async (consumableId, fuelConsumed, distanceDriven)
   }
 };
 
+const stripFilePayload = (records = []) =>
+  records.map(({ contentType, originalName, size }) => ({
+    contentType,
+    originalName,
+    size,
+  }));
+
+const sanitizeTicket = (ticketDoc) => {
+  if (!ticketDoc) return ticketDoc;
+  const ticket = ticketDoc.toObject ? ticketDoc.toObject() : { ...ticketDoc };
+  ticket.ticket_id = ticket.ticket_id || ticket._id;
+  if (Array.isArray(ticket.images)) {
+    ticket.images = stripFilePayload(ticket.images);
+  }
+  if (Array.isArray(ticket.attachments)) {
+    ticket.attachments = stripFilePayload(ticket.attachments);
+  }
+  return ticket;
+};
+
 const getTickets = asyncHandler(async (req, res) => {
   await requireUser(req);
   const query = isAdminRequest(req)
     ? {}
     : { user: new mongoose.Types.ObjectId(req.user.id) };
 
-  const tickets = await Ticket.find(query).lean();
-  res.status(200).json(tickets);
+  const tickets = await Ticket.find(query)
+    .sort({ createdAt: -1 })
+    .select('ticket_id projectname status createdAt user')
+    .lean();
+
+  res.status(200).json(tickets.map(sanitizeTicket));
 });
 
 const getTicket = asyncHandler(async (req, res) => {
   await requireUser(req);
-  const ticket = await requireTicket(req.params.id, { lean: true });
+  const ticket = await requireTicket(req.params.id, {
+    lean: true,
+    select: '-images.data -attachments.data',
+  });
   assertAuthorized(ticket.user, req);
-  res.status(200).json(ticket);
+  res.status(200).json(sanitizeTicket(ticket));
 });
 
 const createTicket = asyncHandler(async (req, res) => {
@@ -208,8 +241,9 @@ const createTicket = asyncHandler(async (req, res) => {
   await decrementSpareCount(projectname, spare, quantity);
   await updateConsumableUsage(consumable, fuelConsumed, totalKm);
 
+  const serializedTicket = sanitizeTicket(ticket);
   res.status(201).json({
-    ...ticket.toObject(),
+    ...serializedTicket,
     uploadReport: {
       images: { saved: images.length, skipped: [] },
       attachments: { saved: attachments.length, skipped: [] },
@@ -235,7 +269,7 @@ const updateTicket = asyncHandler(async (req, res) => {
     runValidators: true,
   }).lean();
 
-  res.status(200).json(updatedTicket);
+  res.status(200).json(sanitizeTicket(updatedTicket));
 });
 
 module.exports = {
